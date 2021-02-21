@@ -19,22 +19,16 @@ class Puzzle:
             # Check for solvability
             solvable = self.is_solvable()
             print("is solvable: ", solvable)
-            if (file is not None) & solvable is False:
+            if file is not None and solvable is False:
+                print('exiting')
                 exit()
 
         # Get solution
-        i = 1
-        for col in range(self.cols):
-            solution_row = []
-            for row in range(self.rows):
-                solution_row.append(str(i))
-                i += 1
-            self.solution.append(solution_row)
-        self.solution[3][3] = '0'
-        print(self.solution)
+        self.init_solution()
 
     def init_board(self, file):
         # Set up board randomly
+        self.board = []
         if file is None:
             n = np.random.choice(range(16), 16, replace=False)
             i = 0
@@ -48,6 +42,18 @@ class Puzzle:
         else:
             for line in file.readlines():
                 self.board.append(line.split())
+
+    def init_solution(self):
+        # Get solution
+        i = 1
+        for col in range(self.cols):
+            solution_row = []
+            for row in range(self.rows):
+                solution_row.append(str(i))
+                i += 1
+            self.solution.append(solution_row)
+        self.solution[3][3] = '0'
+        # print(self.solution)
 
     def get_player_position(self):
         for col in range(self.cols):
@@ -78,16 +84,18 @@ class Puzzle:
         inv_count = 0
         arr = []
         for idn, n in np.ndenumerate(self.board):
-            arr.append(n)
+            arr.append(n.astype(np.int))
         for i in range(len(arr)):
             # print("i: ", i)
-            if arr[i].astype(np.int) == 0:
+            if arr[i] == 0:
                 continue
             for j in range(i + 1, 16):
                 # print("i, j, n, m: ", i, j, arr[i], arr[j])
                 if arr[j].astype(np.int) == 0:
                     continue
                 if arr[i] > arr[j]:
+                    # print("i, j, n, m: ", i, j, arr[i], arr[j])
+                    # print("inv")
                     inv_count += 1
         return inv_count
 
