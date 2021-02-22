@@ -1,8 +1,9 @@
 import numpy as np
+import copy
 
 
 class Puzzle:
-    def __init__(self, file=None):
+    def __init__(self, file=None, g=None):
         self.rows = 4
         self.cols = 4
         self.board = []
@@ -10,21 +11,24 @@ class Puzzle:
         self.player_pos_col = 0
         self.player_pos_row = 0
 
-        solvable = False
-        while not solvable:
-            self.init_board(file)
-            # Get player pos
-            self.player_pos_row, self.player_pos_col = \
-                self.get_player_position()
-            # Check for solvability
-            solvable = self.is_solvable()
-            print("is solvable: ", solvable)
-            if file is not None and solvable is False:
-                print('exiting')
-                exit()
+        if g is None:
+            self.g = 0
+        else:
+            self.g = g + 1
 
-        # Get solution
-        self.init_solution()
+        if self.g == 0:
+            solvable = False
+            while not solvable:
+                self.init_board(file)
+                # Get player pos
+                self.player_pos_row, self.player_pos_col = \
+                    self.get_player_position()
+                # Check for solvability
+                solvable = self.is_solvable()
+                print("is solvable: ", solvable)
+                if file is not None and solvable is False:
+                    print('exiting')
+                    exit()
 
     def init_board(self, file):
         # Set up board randomly
@@ -108,45 +112,56 @@ class Puzzle:
     def move_up(self):
         posrow = self.player_pos_row
         poscol = self.player_pos_col
+
+        p_node = copy.deepcopy(self)
         if self.player_pos_row == 0:
             return print("Illegal move")
         else:
-            self.board[posrow][poscol], self.board[posrow - 1][poscol]\
-                = self.board[posrow - 1][poscol], self.board[posrow][poscol]
-            self.player_pos_row, self.player_pos_col \
-                = self.get_player_position()
+            p_node.board[posrow][poscol], p_node.board[posrow - 1][poscol]\
+                = p_node.board[posrow - 1][poscol], p_node.board[posrow][poscol]
+            p_node.player_pos_row, p_node.player_pos_col \
+                = p_node.get_player_position()
+        return p_node
 
     def move_down(self):
         posrow = self.player_pos_row
         poscol = self.player_pos_col
+
+        p_node = copy.deepcopy(self)
         if self.player_pos_row == 3:
             return print("Illegal move")
         else:
-            self.board[posrow][poscol], self.board[posrow + 1][poscol] \
-                = self.board[posrow + 1][poscol], self.board[posrow][poscol]
-            self.player_pos_row, self.player_pos_col \
-                = self.get_player_position()
+            p_node.board[posrow][poscol], p_node.board[posrow + 1][poscol] \
+                = p_node.board[posrow + 1][poscol], p_node.board[posrow][poscol]
+            p_node.player_pos_row, p_node.player_pos_col \
+                = p_node.get_player_position()
+        return p_node
 
     def move_left(self):
         posrow = self.player_pos_row
         poscol = self.player_pos_col
-        if self.player_pos_col == 0:
+
+        p_node = copy.deepcopy(self)
+        if p_node.player_pos_col == 0:
             return print("Illegal move")
         else:
-            self.board[posrow][poscol], self.board[posrow][poscol - 1] \
-                = self.board[posrow][poscol - 1], self.board[posrow][poscol]
-            self.player_pos_row, self.player_pos_col \
-                = self.get_player_position()
+            p_node.board[posrow][poscol], p_node.board[posrow][poscol - 1] \
+                = p_node.board[posrow][poscol - 1], p_node.board[posrow][poscol]
+            p_node.player_pos_row, p_node.player_pos_col \
+                = p_node.get_player_position()
+        return p_node
 
     def move_right(self):
         posrow = self.player_pos_row
         poscol = self.player_pos_col
-        if self.player_pos_col == 3:
+
+        p_node = copy.deepcopy(self)
+        if p_node.player_pos_col == 3:
             return print("Illegal move")
         else:
-            self.board[posrow][poscol], self.board[posrow][poscol + 1] \
-                = self.board[posrow][poscol + 1], self.board[posrow][poscol]
-            self.player_pos_row, self.player_pos_col \
-                = self.get_player_position()
-
+            p_node.board[posrow][poscol], p_node.board[posrow][poscol + 1] \
+                = p_node.board[posrow][poscol + 1], p_node.board[posrow][poscol]
+            p_node.player_pos_row, p_node.player_pos_col \
+                = p_node.get_player_position()
+        return p_node
 
