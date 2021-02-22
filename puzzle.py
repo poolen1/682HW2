@@ -109,8 +109,8 @@ class Puzzle:
                     inv_count += 1
         return inv_count
 
-    def is_solved(self):
-        if self.board == self.solution:
+    def is_solved(self, solution):
+        if self.board == solution:
             return True
         else:
             return False
