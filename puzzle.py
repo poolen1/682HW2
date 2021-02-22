@@ -126,7 +126,8 @@ class Puzzle:
             p_node.board[posrow][poscol], p_node.board[posrow - 1][poscol]\
                 = p_node.board[posrow - 1][poscol], p_node.board[posrow][poscol]
             p_node.player_pos_row, p_node.player_pos_col \
-                = p_node.get_player_position()
+                = p_node.get_player_position(p_node)
+
         return p_node
 
     def move_down(self):
@@ -140,7 +141,8 @@ class Puzzle:
             p_node.board[posrow][poscol], p_node.board[posrow + 1][poscol] \
                 = p_node.board[posrow + 1][poscol], p_node.board[posrow][poscol]
             p_node.player_pos_row, p_node.player_pos_col \
-                = p_node.get_player_position()
+                = p_node.get_player_position(p_node)
+
         return p_node
 
     def move_left(self):
@@ -154,7 +156,8 @@ class Puzzle:
             p_node.board[posrow][poscol], p_node.board[posrow][poscol - 1] \
                 = p_node.board[posrow][poscol - 1], p_node.board[posrow][poscol]
             p_node.player_pos_row, p_node.player_pos_col \
-                = p_node.get_player_position()
+                = p_node.get_player_position(p_node)
+
         return p_node
 
     def move_right(self):
@@ -168,6 +171,7 @@ class Puzzle:
             p_node.board[posrow][poscol], p_node.board[posrow][poscol + 1] \
                 = p_node.board[posrow][poscol + 1], p_node.board[posrow][poscol]
             p_node.player_pos_row, p_node.player_pos_col \
-                = p_node.get_player_position()
+                = p_node.get_player_position(p_node)
+
         return p_node
 

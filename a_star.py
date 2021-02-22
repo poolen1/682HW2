@@ -1,4 +1,3 @@
-from enum import Enum
 import numpy as np
 
 
@@ -15,12 +14,34 @@ class AStarSearch:
     def __init__(self, start_state, solution):
         self.start_node = AStarNode(start_state, "", 0, 1000)
         self.end_node = AStarNode(solution, "", 1000, 0)
-        self.node_vector = np.array()
+        self.node_list = []
+        self.node_list.append(self.start_node)
 
     def expand_node(self, node):
         moves = self.get_legal_ops(node)
+
         for item in moves:
             print(item)
+            new_node = self.create_successor(node)
+
+            if item == "up":
+                new_node.state = new_node.state.move_up()
+            elif item == 'down':
+                new_node.state = new_node.state.move_down()
+            elif item == "left":
+                new_node.state = new_node.state.move_left()
+            elif item == "right":
+                new_node.state = new_node.state.move_right()
+
+            self.node_list.append(new_node)
+
+        for item in self.node_list:
+            print(item.state.board)
+
+    @staticmethod
+    def create_successor(node):
+        new_node = AStarNode(node.state, node, node.g + 1, node.h)
+        return new_node
 
     @staticmethod
     def get_legal_ops(node):
@@ -63,6 +84,9 @@ class AStarSearch:
                 legal_ops.append(key)
 
         return legal_ops
+
+    def choose_bestnode(self):
+        pass
 
     def search(self):
         pass
