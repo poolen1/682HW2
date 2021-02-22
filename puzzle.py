@@ -22,10 +22,10 @@ class Puzzle:
                 self.init_board(file)
                 # Get player pos
                 self.player_pos_row, self.player_pos_col = \
-                    self.get_player_position()
+                    self.get_player_position(self)
                 # Check for solvability
                 solvable = self.is_solvable()
-                print("is solvable: ", solvable)
+                # print("is solvable: ", solvable)
                 if file is not None and solvable is False:
                     print('exiting')
                     exit()
@@ -49,20 +49,26 @@ class Puzzle:
 
     def init_solution(self):
         # Get solution
+        solution = copy.deepcopy(self)
+        board = []
         i = 1
         for col in range(self.cols):
             solution_row = []
             for row in range(self.rows):
                 solution_row.append(str(i))
                 i += 1
-            self.solution.append(solution_row)
-        self.solution[3][3] = '0'
+            board.append(solution_row)
+        board[3][3] = '0'
+        solution.board = board
+        solution.player_pos_row, solution.player_pos_col = \
+            self.get_player_position(solution)
         # print(self.solution)
+        return solution
 
-    def get_player_position(self):
+    def get_player_position(self, board):
         for col in range(self.cols):
             for row in range(self.rows):
-                if self.board[col][row] == '0':
+                if board.board[col][row] == '0':
                     pos_row = col
                     pos_col = row
                     return pos_row, pos_col
@@ -70,8 +76,8 @@ class Puzzle:
     def is_solvable(self):
         solvable = False
         inv_count = self.count_inversions()
-        print("inversions: ", inv_count)
-        print("pos row: ", self.player_pos_row % 2)
+        # print("inversions: ", inv_count)
+        # print("pos row: ", self.player_pos_row % 2)
         if self.player_pos_row % 2 == 0:  # Empty pos is on even row
             # odd number of inversions
             # print ("inv_count: ", inv_count % 2)
