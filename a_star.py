@@ -8,11 +8,19 @@ class AStarNode:
         self.g = g  # g == depth
         self.h = h  # h == heuristic
         self.f = self.g + self.h
+        self.successors = []
+
+
+class DFSNode:
+    def __init__(self, state, ptr, depth):
+        self.state = state
+        self.ptr = ptr
+        self.d = depth
 
 
 class AStarSearch:
     def __init__(self, start_state, solution):
-        self.start_node = AStarNode(start_state, "", 0, 0)
+        self.start_node = AStarNode(start_state, None, 0, 0)
         self.start_node.h = self.manhattan(self.start_node)
         self.start_node.f = self.start_node.h
         self.end_node = AStarNode(solution, "", 1000, 0)
@@ -21,12 +29,15 @@ class AStarSearch:
         self.closed_list = []
         self.nodes_visited = 0
 
-    def expand_node(self, node):
-        moves = self.get_legal_ops(node)
+    def expand_node(self, bestnode):
+        moves = self.get_legal_ops(bestnode)
+
+        # for succ in bestnode.successors:
+        #     print("first", succ.state, succ.f)
 
         for item in moves:
             # print(item)
-            new_node = self.create_successor(node)
+            new_node = self.create_successor(bestnode)
 
             if item == "up":
                 new_node.state = new_node.state.move_up()
@@ -37,17 +48,29 @@ class AStarSearch:
             elif item == "right":
                 new_node.state = new_node.state.move_right()
 
+            is_dupe = self.is_dupe(new_node)
+            if is_dupe:
+                new_node = is_dupe
+
             new_node.h = self.manhattan(new_node)
             new_node.f = new_node.g + new_node.h
-            self.open_list.append(new_node)
+            # print(new_node.state, new_node.f)
+
+            bestnode.successors.append(new_node)
+
+        self.open_list += bestnode.successors
 
         # bestnode = self.choose_bestnode()
         # for item in self.open_list:
+        #     print(item.state.board)
         #     print(item.f)
+        # exit()
 
     @staticmethod
     def create_successor(node):
         new_node = AStarNode(node.state, node, node.g + 1, node.h)
+        new_node.successors = []
+        # print(new_node.state, new_node.g)
         return new_node
 
     @staticmethod
@@ -66,13 +89,13 @@ class AStarSearch:
         }
 
         if node.ptr:
-            if colpos < parent.player_pos_col:  # moved left, don't right
+            if colpos < parent.state.player_pos_col:  # moved left, don't right
                 moves['right'] = False
-            elif colpos > parent.player_pos_col:  # moved right, don't left
+            elif colpos > parent.state.player_pos_col:  # moved right, don't left
                 moves['left'] = False
-            elif rowpos > parent.player_pos_row:  # moved down, don't up
+            elif rowpos > parent.state.player_pos_row:  # moved down, don't up
                 moves['up'] = False
-            elif rowpos < parent.player_pos_row:  # moved up, don't down
+            elif rowpos < parent.state.player_pos_row:  # moved up, don't down
                 moves['down'] = False
 
         if colpos > 2:  # On far right col, right illegal
@@ -97,7 +120,7 @@ class AStarSearch:
                   '9': (2, 0), '10': (2, 1), '11': (2, 2), '12': (2, 3),
                   '13': (3, 0), '14': (3, 1), '15': (3, 2), '0': (3, 3)
                   }
-        h = node.h
+        h = 0
         for col in range(0, 4):
             for row in range(0, 4):
                 tile = node.state.board[col][row]
@@ -111,12 +134,10 @@ class AStarSearch:
         return h
 
     def choose_bestnode(self):
-        self.open_list.sort(key=lambda x: x.f)
-        for item in self.open_list:
-            print(item.f)
-        bestnode = self.open_list.pop(0)
+        self.open_list.sort(key=lambda x: x.f, reverse=True)
+        bestnode = self.open_list.pop()
         self.nodes_visited += 1
-        self.close_list.append(bestnode)
+        self.closed_list.append(bestnode)
         return bestnode
 
     def search(self):
@@ -126,15 +147,65 @@ class AStarSearch:
                 print("Failure")
                 exit()
             bestnode = self.choose_bestnode()
-            if bestnode.state.is_solved(self.end_node.state):
+            # ("bestnode: ", bestnode.state, bestnode.f)
+            if bestnode.state.is_solved(self.end_node.state.board):
                 solved = True
-                break
-            
+                continue
+            self.expand_node(bestnode)
+
         print("Puzzle solved")
         print("Steps: ", bestnode.g)
         print("Nodes visited: ", self.nodes_visited)
+        print(self.start_node.state.board)
+        print(bestnode.state.board)
         exit()
 
+    def is_dupe(self, node):
+        duplicate = False
+        for open_node in self.open_list:
+            if node.state.board == open_node.state.board:
+                # print(self.nodes_visited)
+                duplicate = True
+                if node.g > open_node.g:
+                    open_node.ptr = node.ptr
+                    node.ptr = ""
+                return open_node
+
+        for closed_node in self.closed_list:
+            if node.state.board == closed_node.state.board:
+                # print('nodes visited: ', self.nodes_visited)
+                duplicate = True
+                if node.g > closed_node.g:
+                    closed_node.ptr = node.ptr
+                    node.ptr = ""
+                    self.propagate_closed_old(closed_node)
+                return closed_node
+        return duplicate
+
+    def propagate_closed_old(self, old):
+        start_node = DFSNode(old, None, 0)
+        d_limit = 1000
+        open_list = [start_node]
+        closed_list = []
+        while True:
+            if not open_list:
+                return
+            # print(open_list)
+            n = open_list.pop(0)
+            # print(n)
+            closed_list.append(n)
+
+            if n.d <= d_limit:
+                if n.state.successors:
+                    for successor in n.state.successors:
+                        if successor.ptr == n.state or successor.g > n.state.g:
+                            new_node = DFSNode(successor, n, n.d + 1)
+                            new_node.state.g = n.state.g + 1
+                            new_node.state.f = new_node.state.g + new_node.state.h
+                            open_list.append(new_node)
 
     def prune(self):
+        pass
+
+    def get_path(self):
         pass

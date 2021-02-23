@@ -1,11 +1,14 @@
 import puzzle
 import a_star
 
-f = open("./boards/board1.txt", "r")
+# f = open("./boards/board1.txt", "r")
+# f = open("./boards/spiralBoard.txt", "r")
+# f = open("./boards/backwardBoard.txt", "r")
 # f = open("./boards/41invBoard.txt", "r")
 # f = open("./boards/62invBoard.txt", "r")
 # f = open("./boards/solvedBoard.txt", "r")
 # f = open("./boards/56invBoard.txt", "r")
+# f = open("./boards/easyBoard.txt", "r")
 
 p = puzzle.Puzzle(f)
 # p = puzzle.Puzzle()
@@ -19,7 +22,9 @@ search.expand_node(search.start_node)
 # print(p.player_pos_row, p.player_pos_col)
 # print(sol.board)
 # print(sol.player_pos_row, sol.player_pos_col)
-# print("is solved: ", p.is_solved())
+# print("is solved: ", p.is_solved(sol.board))
+
+search.search()
 
 # p.move_right()
 #  print(p.board)
