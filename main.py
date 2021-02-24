@@ -1,6 +1,5 @@
 import puzzle
 import a_star
-import timeit
 from datetime import datetime
 
 f1 = open("./boards/board1.txt", "r")
@@ -19,6 +18,6 @@ def run(file):
     print('===================================')
 
 
-# run(f1)
+run(f1)
 run(f2)
-# run(f3)
+run(f3)
